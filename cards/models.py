@@ -4,6 +4,11 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
 
+def default_expiry_date():
+    """Set default time to current date plus 4 years"""
+    return timezone.now() + relativedelta(years=4)
+
+
 class CardType(models.Model):
     """Model for storing the types of cards"""
     name = models.CharField(max_length=250)
@@ -26,9 +31,7 @@ class Card(models.Model):
     cardholder = models.ForeignKey(
         'persons.Person', on_delete=models.CASCADE, related_name='cards'
     )
-    expiry_date = models.DateField(
-        default=timezone.now()+relativedelta(years=4)
-    )
+    expiry_date = models.DateField(default=default_expiry_date)
 
     def __str__(self):
         return self.card_number
