@@ -25,7 +25,7 @@ SECRET_KEY = '*=1ev0eus7ta=y9=_o8yx2*^-chynz1mev7$*w&x^d(h7&2nz#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*',]
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'persons',
+    'cards',
 ]
 
 MIDDLEWARE = [
