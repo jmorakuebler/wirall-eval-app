@@ -5,8 +5,8 @@ from dateutil.relativedelta import relativedelta
 
 
 def default_expiry_date():
-    """Set default time to current date plus 4 years"""
-    return timezone.now() + relativedelta(years=4)
+    """Set default date to current date plus 4 years"""
+    return timezone.now().date() + relativedelta(years=4)
 
 
 class CardType(models.Model):
@@ -35,3 +35,8 @@ class Card(models.Model):
 
     def __str__(self):
         return self.card_number
+
+    @property
+    def is_valid(self):
+        """Check if card is not expired"""
+        return self.expiry_date <= timezone.now().date()
