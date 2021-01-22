@@ -39,4 +39,4 @@ class Card(models.Model):
     @property
     def is_valid(self):
         """Check if card is not expired"""
-        return self.expiry_date <= timezone.now().date()
+        return self.expiry_date > timezone.now().date()
