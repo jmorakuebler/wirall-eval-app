@@ -1,3 +1,11 @@
 # wirall-eval-app
 
 App for Wirall evaluacion test
+
+
+## Steps for running the server
+1. Create a python virtual environment (desirable)
+2. Install the requirements with `pip install -r requirements.txt`
+3. Run the migrations with `python manage.py migrate`
+4. Insert initial data with `python manage.py loaddata initial_data.json`
+5. Run the server with `python manage.py runserver 0.0.0.0:8000`
