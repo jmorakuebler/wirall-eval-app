@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.serializers import ValidationError
@@ -18,7 +20,7 @@ class CardViewSet(
     serializer_class = serializers.CardSerializer
     permission_classes = (IsAuthenticated,)
     queryset = models.Card.objects.all()
-    operation_limit = 10000
+    operation_limit = 1000
 
     def get_queryset(self):
         qs = self.queryset
@@ -30,8 +32,8 @@ class CardViewSet(
     def perform_create(self, serializer):
         card = serializer.save(cardholder=self.request.user.person)
 
-    @action(methods=['GET'], detail=True, url_path='do-operation')
-    def do_operation(self, request, pk=None):
+    @action(methods=['GET'], detail=True, url_path='make-operation')
+    def make_operation(self, request, pk=None):
         card = self.get_object()
         response = {}
 

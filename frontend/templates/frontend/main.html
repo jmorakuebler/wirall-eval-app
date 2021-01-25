@@ -9,7 +9,7 @@
   <button class="btn btn-success" id="addCardButton" data-url="{% url 'cards:card-list' %}">Add new card</button>
   <ul>
     {% for card in card_list %}
-    <li><a href="#" class="cardItem" data-url="{% url 'cards:card-detail' card.id %}">{{ card }}</a></li>
+    <li><a href="#" class="cardItem" data-card-id="{{ card.id}}" data-url="{% url 'cards:card-detail' card.id %}">{{ card }}</a></li>
     {% endfor %}
   </ul>
   <hr>
@@ -21,6 +21,9 @@
         {{ form|crispy }}
         <input type="submit" value="Save" class="btn btn-primary">
       </form>
+      <br>
+      <button id="check-operation-button" class="btn btn-info action-button" disabled>Check Operation</button>
+      <button id="make-operation-button" class="btn btn-info action-button" disabled>Make Operation</button>
     </div>
   </div>
 {% endblock content %}
@@ -33,10 +36,16 @@
         $('#card-form').attr('method', "POST");
         $('#card-form').attr('action', $(this).attr('data-url'));
         $('#card-form').trigger("reset");
+        $('.action-button').removeAttr('data-url');
+        $('.action-button').attr('disabled', 'disabled');
         $('#id_card_type').focus();
       });
+
       $('.cardItem').click(function(){
         let actionUrl = $(this).attr('data-url');
+        $('.action-button').removeAttr('disabled');
+        $('#check-operation-button').attr('data-url', '/api/cards/cards/'+$(this).attr('data-card-id')+'/check-operation');
+        $('#make-operation-button').attr('data-url', '/api/cards/cards/'+$(this).attr('data-card-id')+'/make-operation');
         $.ajax({
           type: "GET",
           url: $(this).attr('data-url'),
@@ -68,6 +77,8 @@
           success: function(data){
             alert('Card updated successfully');
             $('#card-form').trigger('reset');
+            $('.action-button').removeAttr('data-url');
+            $('.action-button').attr('disabled', 'disabled');
           },
           error: function(data) {
             alert(
@@ -77,6 +88,37 @@
           }
         });
         return false;
+      });
+      $('#check-operation-button').click(function(){
+        $.ajax({
+          type: "GET",
+          url: $(this).attr('data-url'),
+          success: function(data){
+            var is_valid = data.is_valid ? "valid" : "not valid";
+            alert("Operation is "+ is_valid);
+          },
+          error: function(data) {
+            alert(
+              "Something wrong happened.\nStatus code: "+
+              data.status+"\nResponse: "+ data.responseText+"."
+            );
+          }
+        });
+      });
+      $('#make-operation-button').click(function(){
+        $.ajax({
+          type: "GET",
+          url: $(this).attr('data-url'),
+          success: function(data){
+            alert("Message: "+data.message);
+          },
+          error: function(data) {
+            alert(
+              "Something wrong happened.\nStatus code: "+
+              data.status+"\nResponse: "+ data.responseText+"."
+            );
+          }
+        });
       });
     });
   </script>
