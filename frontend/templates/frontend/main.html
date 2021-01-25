@@ -38,12 +38,16 @@
         $('#card-form').trigger("reset");
         $('.action-button').removeAttr('data-url');
         $('.action-button').attr('disabled', 'disabled');
+        if ($('#id_card_number').hasClass('is-valid')){ $('#id_card_number').removeClass('is-valid') };
+        if ($('#id_card_number').hasClass('is-invalid')){ $('#id_card_number').removeClass('is-invalid') };
         $('#id_card_type').focus();
       });
 
       $('.cardItem').click(function(){
         let actionUrl = $(this).attr('data-url');
         $('.action-button').removeAttr('disabled');
+        if ($('#id_card_number').hasClass('is-valid')){ $('#id_card_number').removeClass('is-valid') };
+        if ($('#id_card_number').hasClass('is-invalid')){ $('#id_card_number').removeClass('is-invalid') };
         $('#check-operation-button').attr('data-url', '/api/cards/cards/'+$(this).attr('data-card-id')+'/check-operation');
         $('#make-operation-button').attr('data-url', '/api/cards/cards/'+$(this).attr('data-card-id')+'/make-operation');
         $.ajax({
@@ -66,6 +70,33 @@
         return false;
       });
 
+      $('#id_card_number').focusout(function(){
+        if ($('#card-form').attr('method') === "POST" && !$('#card-p').length){
+          $.ajax({
+            type: "GET",
+            url: "/api/cards/cards/check-card-number/",
+            data: {card_number: $(this).val()},
+            success: function(data) {
+              if(data.is_available) {
+                console.log("adding p element success");
+                $('#id_card_number').removeClass('is-invalid');
+                $('#id_card_number').addClass('is-valid')
+              } else {
+                console.log("adding p element danger");
+                $('#id_card_number').removeClass('is-valid');
+                $('#id_card_number').addClass('is-invalid')
+              }
+            },
+            error: function(data) {
+              console.log(
+              "Something wrong happened.\nStatus code: "+
+              data.status+"\nResponse: "+data.responseText+"."
+            );
+            }
+          });
+        }
+      });
+
       $('#card-form').submit(function (evt){
         $.ajax({
           type: $(this).attr('method'),
@@ -79,6 +110,8 @@
             $('#card-form').trigger('reset');
             $('.action-button').removeAttr('data-url');
             $('.action-button').attr('disabled', 'disabled');
+            if ($('#id_card_number').hasClass('is-valid')){ $('#id_card_number').removeClass('is-valid') };
+            if ($('#id_card_number').hasClass('is-invalid')){ $('#id_card_number').removeClass('is-invalid') };
           },
           error: function(data) {
             alert(

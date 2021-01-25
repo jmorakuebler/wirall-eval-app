@@ -64,3 +64,17 @@ class CardViewSet(
             data=response,
             status=status.HTTP_200_OK
         )
+
+    @action(methods=['GET'], detail=False, url_path='check-card-number')
+    def check_card_number(self, request):
+        card_number = request.query_params.get('card_number')
+        data = {'is_available': None}
+        if card_number:
+            is_available = models.Card.objects.filter(
+                card_number=card_number
+            ).exists()
+            data['is_available'] = not is_available
+        return Response(
+            data=data,
+            status=status.HTTP_200_OK
+        )
