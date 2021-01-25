@@ -1,6 +1,4 @@
-from django.utils import timezone
-
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.serializers import ValidationError
 from rest_framework import viewsets, mixins, status
@@ -10,7 +8,13 @@ from . import serializers
 from . import models
 
 
-class CardViewSet(viewsets.ModelViewSet):
+class CardViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = serializers.CardSerializer
     permission_classes = (IsAuthenticated,)
     queryset = models.Card.objects.all()
@@ -19,9 +23,12 @@ class CardViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = self.queryset
         user = self.request.user
-        if not user.is_staff and not user.is_superuser:
+        if not user.is_superuser:
             qs = qs.filter(cardholder=user.person)
         return qs
+
+    def perform_create(self, serializer):
+        card = serializer.save(cardholder=self.request.user.person)
 
     @action(methods=['GET'], detail=True, url_path='do-operation')
     def do_operation(self, request, pk=None):
