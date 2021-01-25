@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <h1>Home Page</h1>
+  <br>
+  <h3>Welcome back, {{ request.user.get_full_name }}</h3>
+  <h4>List of {% if request.user.is_superuser %}all{% else %}user{% endif %} cards ({{ card_list.count }})</h4>
+  <button class="btn btn-success" id="addCardButton" data-url="{% url 'cards:card-list' %}">Add new card</button>
+  <ul>
+    {% for card in card_list %}
+    <li><a href="#" class="cardItem" data-url="{% url 'cards:card-detail' card.id %}">{{ card }}</a></li>
+    {% endfor %}
+  </ul>
+  <hr>
+  <h4>Card Form</h4>
+  <div class="row justify-content-md-start">
+    <div class="col-auto">
+      <form id="card-form" action="{% url 'cards:card-list' %}" method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input type="submit" value="Save" class="btn btn-primary">
+      </form>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block jscript %}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#addCardButton').click(function(){
+        $('#card-form').attr('method', "POST");
+        $('#card-form').attr('action', $(this).attr('data-url'));
+        $('#card-form').trigger("reset");
+        $('#id_card_type').focus();
+      });
+      $('.cardItem').click(function(){
+        let actionUrl = $(this).attr('data-url');
+        $.ajax({
+          type: "GET",
+          url: $(this).attr('data-url'),
+          success: function(data) {
+            $('#card-form').attr('method', 'PUT')
+            $('#card-form').attr('action', actionUrl);
+            $('#id_card_type').val(data.card_type);
+            $('#id_card_number').val(data.card_number);
+            $('#id_expiry_date').val(data.expiry_date);
+          },
+          error: function(data) {
+            console.log(
+              "Something wrong happened.\nStatus code: "+
+              data.status+"\nResponse: "+data.responseText+"."
+            );
+          }
+        });
+        return false;
+      });
+
+      $('#card-form').submit(function (evt){
+        $.ajax({
+          type: $(this).attr('method'),
+          url: $(this).attr('action'),
+          headers: {
+            'X-CSRFToken': Cookies.get('csrftoken')
+          },
+          data: $(this).serialize(),
+          success: function(data){
+            alert('Card updated successfully');
+            $('#card-form').trigger('reset');
+          },
+          error: function(data) {
+            alert(
+              "Something wrong happened.\nStatus code: "+
+              data.status+"\nResponse: "+ data.responseText+"."
+            );
+          }
+        });
+        return false;
+      });
+    });
+  </script>
+{% endblock jscript %}

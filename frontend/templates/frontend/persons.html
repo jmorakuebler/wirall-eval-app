@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <h1>Persons</h1>
+  <h4>List of {% if request.user.is_superuser %}all{% else %}user{% endif %} persons ({{ person_list.count }})</h4>
+  <button class="btn btn-success" id="addPersonButton" data-url="{% url 'persons:person-list' %}">Add new person</button>
+  <ul>
+    {% for person in person_list %}
+      <li>
+        <a href="#" class="personItem" data-url="{% url 'persons:person-detail' person.id %}">{{ person }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  <hr>
+  <h4>Person Form</h4>
+  <div class="row justify-content-md-start">
+    <div class="col-auto">
+      <form id="person-form" action="{% url 'persons:person-list' %}" method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input type="submit" value="Save" class="btn btn-primary">
+      </form>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block jscript %}
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#addPersonButton').click(function(){
+      $('#person-form').attr('method', "POST");
+      $('#person-form').attr('action', $(this).attr('data-url'))
+      $('#person-form').trigger("reset");
+      $('#id_user').focus();
+    });
+    $('.personItem').click(function(){
+      let actionUrl = $(this).attr('data-url');
+      $.ajax({
+        type: "GET",
+        url: $(this).attr('data-url'),
+        success: function(data) {
+          $('#person-form').attr('method', 'PUT')
+          $('#person-form').attr('action', actionUrl);
+          $('#id_user').val(data.user);
+          $('#id_address').val(data.address);
+        },
+        error: function(data) {
+          console.log(
+            "Something wrong happened.\nStatus code: "+
+            data.status+"\nResponse: "+data.responseText+"."
+          );
+        }
+      });
+      return false;
+    });
+
+    $('#person-form').submit(function (evt){
+      $.ajax({
+        type: $(this).attr('method'),
+        url: $(this).attr('action'),
+        headers: {
+          'X-CSRFToken': Cookies.get('csrftoken')
+        },
+        data: $(this).serialize(),
+        success: function(data){
+          alert('Person updated successfully');
+          $('#person-form').trigger('reset');
+        },
+        error: function(data) {
+          alert(
+            "Something wrong happened.\nStatus code: "+
+            data.status+"\nResponse: "+ data.responseText+"."
+          );
+        }
+      });
+      return false;
+    });
+  });
+</script>
+{% endblock jscript %}
