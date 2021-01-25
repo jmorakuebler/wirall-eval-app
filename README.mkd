@@ -9,3 +9,9 @@ App for Wirall evaluacion test
 3. Run the migrations with `python manage.py migrate`
 4. Insert initial data with `python manage.py loaddata initial_data.json`
 5. Run the server with `python manage.py runserver 0.0.0.0:8000`
+
+
+## Credentials
+1. Super admin user: admin / adminadmin123
+2. Test User 1: testuser / testpass123
+3. Test User 2: testuser2 / testpass123
